@@ -1,0 +1,147 @@
+------------------------------ Workspace Hierarchy Configuration ------------------------------
+
+
+
+### Create workspace - (CHILD)
+POST {{endpoint}}/api/v1/entities/workspaces
+Content-Type: application/vnd.gooddata.api+json
+Authorization: Bearer {{TOKEN}}
+
+{
+  "data": {
+    "id": "{{IDCHILD}}",
+    "type": "workspace",
+    "attributes": {
+      "description": "(Child)",
+      "name": "Child - WORKSPACE"
+    },
+    "relationships": {
+      "parent": {
+        "data": {
+          "id": "{{IDPARENT}}",
+          "type": "workspace"
+        }
+      }
+    }
+  }
+}
+
+
+
+### Create Workspace Datafilter
+# @name createWorkspaceDataFilters
+POST {{endpoint}}/api/v1/entities/workspaces/{{PARENTWORKSPACE}}/workspaceDataFilters
+Content-Type: application/vnd.gooddata.api+json
+Authorization: Bearer {{token}}
+
+{
+    "data": {
+      "id": "{{FILTERID}}",
+      "type": "workspaceDataFilter",
+      "attributes": {
+        "columnName": "{{COLUMNID FROM LDM}}",
+        "title": "Client state"
+      }
+    }
+  }
+
+ 
+### Configuring Workspace Datafilters on child 
+# @name createWorkspaceDataFilters
+POST {{endpoint}}/api/v1/entities/workspaces/{{CHILDID}}/workspaceDataFilterSettings
+Content-Type: application/vnd.gooddata.api+json
+Authorization: Bearer {{token}}
+
+{
+    "data": {
+        "id": "{{CHILDID}}",
+        "type": "workspaceDataFilterSetting",
+        "attributes": {
+            "filterValues": [
+                "Values between quotes, separated by quotes"
+            ],
+            "title": "all"
+        },
+        "relationships": {
+            "workspaceDataFilter": {
+                "data": {
+                    "id": "{{FILTERID}}",
+                    "type": "workspaceDataFilter"
+                }
+            }
+        }
+    }
+}
+
+
+
+--------------USER PERMISSIONS---------------
+
+
+###List users  
+# @name listUsers
+GET {{endpoint}}/api/v1/entities/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+### User Workspace Permission https://www.gooddata.com/docs/cloud/manage-organization/manage-permissions/
+# @name userWorkspaces
+PUT {{endpoint}}/api/v1/layout/workspaces/{{WORKSPACEID}}/permissions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "permissions": [
+      {
+        "assignee": {
+          "id": "{{USERID}}",
+          "type": "user"
+        },
+        "name": "ANALYZE"
+      }
+    ]
+  }
+
+
+
+### User Workspace Permission on Dashboard Level https://www.gooddata.com/docs/cloud/manage-organization/manage-permissions/
+# @name userWorkspaces
+POST {{endpoint}}/api/v1/actions/workspaces/{{WORKSPACEID}}/analyticalDashboards/{{DASHBOARDID}}/managePermissions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+[
+    {
+        "assigneeIdentifier": {
+        "id": "{{USERID}}",
+        "type": "user"
+        },
+        "permissions": ["VIEW"]
+    }
+]
+
+
+
+
+### User Data Filters - Here we have one example using Customer Country column  https://www.gooddata.com/docs/cloud/workspaces/user-data-filters/
+# @name userDataFilters
+PUT {{endpoint}}/api/v1/layout/workspaces/{{WORKSPACEID}}/userDataFilters/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "userDataFilters": [
+      {
+        "id": "{{FILTERID}}",
+        "maql": "{label/customer_country} = \"United States\"",
+        "title": "tenant filtered on US data",
+        "user": {
+          "id": "{{USERID}}",
+          "type": "user"
+        }
+      }
+    ]
+   }
+
+
